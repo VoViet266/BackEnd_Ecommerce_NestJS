@@ -13,7 +13,7 @@ import { ProductService } from './product.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { ResponseMessage, User } from 'src/decorator/customize';
-import { IUser } from 'src/users/interface/user.interface';
+import { IUser } from 'src/user/interface/user.interface';
 
 @Controller('api/v1/product')
 export class ProductController {
@@ -22,7 +22,6 @@ export class ProductController {
   @Post()
   @ResponseMessage('Product created successfully')
   create(@Body() createProductDto: CreateProductDto, @User() user: IUser) {
-    console.log('user: ', user);
     return this.productService.create(createProductDto, user);
   }
   @Get()
@@ -37,7 +36,7 @@ export class ProductController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.productService.findOne(+id);
+    return this.productService.findOne(id);
   }
 
   @Patch(':id')

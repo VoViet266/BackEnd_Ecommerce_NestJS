@@ -20,10 +20,6 @@ export class RoleService {
     return role;
   }
 
-  findAll() {
-    return `This action returns all roles`;
-  }
-
   // findOne(id: number) {
   //   return `This action returns a #${id} role`;
   // }

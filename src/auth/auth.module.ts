@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { UsersService } from 'src/users/users.service';
-import { UsersModule } from 'src/users/users.module';
+import { UsersService } from 'src/user/users.service';
+import { UsersModule } from 'src/user/users.module';
 import { PassportModule } from '@nestjs/passport';
 
 import { LocalStrategy } from './passport/local.strategy';
@@ -10,8 +10,8 @@ import { JwtModule, JwtService } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtStrategy } from './passport/jwt.strategy';
 import ms from 'ms';
-import { RoleService } from 'src/roles/role.service';
-import { RolesModule } from 'src/roles/roles.module';
+import { RoleService } from 'src/role/role.service';
+import { RolesModule } from 'src/role/roles.module';
 
 @Module({
   imports: [

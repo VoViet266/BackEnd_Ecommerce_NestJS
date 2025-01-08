@@ -1,8 +1,8 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { UsersService } from 'src/users/users.service';
+import { UsersService } from 'src/user/users.service';
 import { JwtService } from '@nestjs/jwt';
-import { IUser } from 'src/users/interface/user.interface';
-import { CreateUserDto, RegisterUserDto } from 'src/users/dto/create-user.dto';
+import { IUser } from 'src/user/interface/user.interface';
+import { CreateUserDto, RegisterUserDto } from 'src/user/dto/create-user.dto';
 import { ConfigService } from '@nestjs/config';
 import ms from 'ms';
 import { Response } from 'express';

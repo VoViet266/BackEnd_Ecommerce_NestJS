@@ -12,8 +12,8 @@ import { Response } from 'express';
 import { LocalAuthGuard } from './passport/local.guard';
 import { AuthService } from './auth.service';
 import { Public, ResponseMessage, User } from '../decorator/customize';
-import { RegisterUserDto } from 'src/users/dto/create-user.dto';
-import { IUser } from 'src/users/interface/user.interface';
+import { RegisterUserDto } from 'src/user/dto/create-user.dto';
+import { IUser } from 'src/user/interface/user.interface';
 
 @Controller('/api/v1/auth') // Namespace cho module Auth
 export class AuthController {

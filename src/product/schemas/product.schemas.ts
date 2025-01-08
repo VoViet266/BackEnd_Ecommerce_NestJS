@@ -2,6 +2,8 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { IsNotEmpty } from 'class-validator';
 import { ObjectId } from 'mongodb';
 import mongoose, { HydratedDocument } from 'mongoose';
+import { Brand } from 'src/brand/schemas/brand.schema';
+import { Category } from 'src/category/schemas/category.schemas';
 import { TypeImage } from 'src/Constant/typeImage.enum';
 
 export type ProductDocument = HydratedDocument<Product>;
@@ -18,24 +20,38 @@ class Image {
 @Schema({ timestamps: true })
 export class Product {
   @Prop({ required: true })
-  @IsNotEmpty({ message: 'Product name is required' })
   name: string;
+
   @Prop()
   description: string;
+
   @Prop({ required: true })
-  @IsNotEmpty({ message: 'Price is required' })
   price: number;
+
+  @Prop()
+  stock: number;
+
   @Prop()
   discount: number;
-  @Prop()
-  categoryId: ObjectId;
-  @Prop()
-  brandId: ObjectId;
+
+  @Prop({
+    type: [mongoose.Schema.Types.ObjectId],
+    ref: Category.name,
+  })
+  categoryId: mongoose.Types.ObjectId[];
+
+  @Prop({
+    type: [mongoose.Schema.Types.ObjectId],
+    ref: Brand.name,
+  })
+  brandId: mongoose.Types.ObjectId[];
+
   @Prop()
   images: Image[];
 
   @Prop()
   createdAt: Date;
+
   @Prop({
     type: Object,
   })
