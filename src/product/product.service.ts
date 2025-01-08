@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
@@ -54,14 +54,28 @@ export class ProductService {
     };
   }
 
-  findOne(id: string) {
+  async findOne(id: string) {
+    const existingProduct = await this.productModel.findById(id).exec();
+    if (!existingProduct) {
+      throw new NotFoundException(
+        'Product with ID ${id} not found in the database',
+      );
+    }
     return this.productModel
       .findById(id)
       .populate(['categoryId', 'brandId'])
       .exec();
   }
 
-  update(id: string, updateProductDto: UpdateProductDto, user: IUser) {
+  async update(id: string, updateProductDto: UpdateProductDto, user: IUser) {
+    const existingProduct = await this.productModel.findById(id).exec();
+
+    // Nếu không tồn tại, ném lỗi NotFoundException
+    if (!existingProduct) {
+      throw new NotFoundException(
+        `Product with ID ${id} not found in the database`,
+      );
+    }
     return this.productModel.updateOne(
       { _id: id },
       {
@@ -75,6 +89,12 @@ export class ProductService {
   }
 
   remove(id: string) {
+    const existingProduct = this.productModel.findById(id).exec();
+    if (!existingProduct) {
+      throw new NotFoundException(
+        `Product with ID ${id} not found in the database`,
+      );
+    }
     return this.productModel.deleteOne({ _id: id });
   }
 }

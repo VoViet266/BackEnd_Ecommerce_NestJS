@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateBrandDto } from './dto/create-brand.dto';
 import { UpdateBrandDto } from './dto/update-brand.dto';
 import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
@@ -57,6 +57,10 @@ export class BrandService {
   // }
 
   update(id: string, updateBrandDto: UpdateBrandDto, user: IUser) {
+    const existingBrand = this.brandModel.findById(id).exec();
+    if (!existingBrand) {
+      throw new NotFoundException(`Brand with ${id} not found`);
+    }
     return this.brandModel.updateOne(
       { _id: id },
       {
@@ -70,6 +74,10 @@ export class BrandService {
   }
 
   remove(id: string) {
+    const existingBrand = this.brandModel.findById(id).exec();
+    if (!existingBrand) {
+      throw new NotFoundException(`Brand with ${id} not found`);
+    }
     return this.brandModel.deleteOne({ _id: id });
   }
 }

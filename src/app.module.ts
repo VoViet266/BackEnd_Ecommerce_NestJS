@@ -12,20 +12,13 @@ import { RolesModule } from './role/roles.module';
 import { ProductModule } from './product/product.module';
 import { CategoryModule } from './category/category.module';
 import { BrandModule } from './brand/brand.module';
+import { OrderModule } from './order/order.module';
+import { CartModule } from './cart/cart.module';
+import { mongodbConfig } from './config/mongodb.config';
 
 @Module({
   imports: [
-    MongooseModule.forRootAsync({
-      imports: [ConfigModule],
-      useFactory: async (configService: ConfigService) => ({
-        uri: configService.get<string>('MONGODB_URI'),
-        connectionFactory: (connection: any) => {
-          connection.plugin(softDeletePlugin);
-          return connection;
-        },
-      }),
-      inject: [ConfigService],
-    }),
+    MongooseModule.forRootAsync(mongodbConfig),
     ConfigModule.forRoot({
       isGlobal: true,
     }),
@@ -37,6 +30,8 @@ import { BrandModule } from './brand/brand.module';
     ProductModule,
     CategoryModule,
     BrandModule,
+    OrderModule,
+    CartModule,
   ],
   controllers: [AppController],
   providers: [AppService],

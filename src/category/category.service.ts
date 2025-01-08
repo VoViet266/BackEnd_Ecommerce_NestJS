@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
@@ -6,6 +6,7 @@ import { Category, CategoryDocument } from './schemas/category.schemas';
 import { IUser } from 'src/user/interface/user.interface';
 import { InjectModel } from '@nestjs/mongoose';
 import aqp from 'api-query-params';
+import mongoose from 'mongoose';
 
 @Injectable()
 export class CategoryService {
@@ -53,10 +54,18 @@ export class CategoryService {
     };
   }
   findOne(id: string) {
+    const existingCategory = this.categoryModel.findById(id).exec();
+    if (!existingCategory) {
+      throw new NotFoundException(`Category with ${id} not found`);
+    }
     return this.categoryModel.findById(id);
   }
 
   update(id: string, updateCategoryDto: UpdateCategoryDto, user: IUser) {
+    const existingCategory = this.categoryModel.findById(id).exec();
+    if (!existingCategory) {
+      throw new NotFoundException(`Category with ${id} not found`);
+    }
     return this.categoryModel.updateOne(
       { _id: id },
       {
@@ -70,6 +79,10 @@ export class CategoryService {
   }
 
   remove(id: string) {
+    const existingCategory = this.categoryModel.findById(id).exec();
+    if (!existingCategory) {
+      throw new NotFoundException(`Category with ${id} not found`);
+    }
     return this.categoryModel.deleteOne({ _id: id });
   }
 }

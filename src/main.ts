@@ -4,9 +4,9 @@ import { join } from 'path';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { ConfigService } from '@nestjs/config';
 import { ValidationPipe } from '@nestjs/common';
-import { JwtAuthGuard } from './auth/passport/jwt.auth.guard';
-import { TransformInterceptor } from './core/transform.interceptor';
-import { RolesGuard } from './auth/passport/roles.guard';
+import { JwtAuthGuard } from './common/guards/jwt.auth.guard';
+import { TransformInterceptor } from './common/interceptors/transform.interceptor';
+import { RolesGuard } from './common/guards/roles.guard';
 import cookieParser = require('cookie-parser');
 // require('dotenv').config();
 
