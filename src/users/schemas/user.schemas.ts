@@ -1,5 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { HydratedDocument } from 'mongoose';
+import mongoose, { HydratedDocument } from 'mongoose';
+import { Role } from 'src/roles/Schemas/role.schemas';
 
 export type UserDocument = HydratedDocument<User>;
 
@@ -24,13 +25,39 @@ export class User {
   address: string;
 
   @Prop()
-  createAt: Date;
+  refreshToken: string;
+
+  @Prop({
+    type: [mongoose.Schema.Types.ObjectId],
+    ref: Role.name,
+    default: ['677cfbb7811cbee760e7a86a'],
+  })
+  roleID: mongoose.Types.ObjectId[];
 
   @Prop()
-  updateAt: Date;
+  createdAt: Date;
+  @Prop({
+    type: Object,
+  })
+  createdBy: {
+    _id: mongoose.Schema.Types.ObjectId;
+    email: string;
+  };
 
+  @Prop({ type: Object })
+  updatedBy: {
+    _id: mongoose.Schema.Types.ObjectId;
+    email: string;
+  };
+
+  @Prop({ type: Object })
+  deletedBy: {
+    _id: mongoose.Schema.Types.ObjectId;
+    email: string;
+  };
   @Prop()
   isDeleted: boolean;
+
   @Prop()
   deletedAt: Date;
 }

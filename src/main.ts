@@ -6,7 +6,9 @@ import { ConfigService } from '@nestjs/config';
 import { ValidationPipe } from '@nestjs/common';
 import { JwtAuthGuard } from './auth/passport/jwt.auth.guard';
 import { TransformInterceptor } from './core/transform.interceptor';
-require('dotenv').config();
+import { RolesGuard } from './auth/passport/roles.guard';
+import cookieParser = require('cookie-parser');
+// require('dotenv').config();
 
 declare const module: any;
 async function bootstrap() {
@@ -14,9 +16,14 @@ async function bootstrap() {
   app.useStaticAssets(join(__dirname, '..', 'public'));
   app.setBaseViewsDir(join(__dirname, '..', 'views'));
 
+  app.use(cookieParser());
   // Cần phải xác thực token mới cho phép truy cập vào các api khác
   const reflector = app.get(Reflector);
-  app.useGlobalGuards(new JwtAuthGuard(reflector));
+  //jwtAuthGuard và RolesGuard sẽ được sử dụng cho tất cả các route
+  // jwtAuthGuard sẽ xác thực token
+  // RolesGuard sẽ xác thực role của user
+  //
+  app.useGlobalGuards(new JwtAuthGuard(reflector), new RolesGuard(reflector));
 
   app.useGlobalPipes(new ValidationPipe());
 

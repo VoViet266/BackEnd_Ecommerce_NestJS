@@ -7,12 +7,14 @@ import {
   Param,
   Delete,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import { CompaniesService } from './companies.service';
 import { CreateCompanyDto } from './dto/create-company.dto';
 import { UpdateCompanyDto } from './dto/update-company.dto';
-import { ResponseMessage, User } from 'src/decorator/customize';
-import { IUser } from 'src/users/user.interface';
+import { ResponseMessage, Roles, User } from 'src/decorator/customize';
+import { IUser } from 'src/users/interface/user.interface';
+import { RolesUser } from 'src/Constant/roles.enum';
 
 @Controller('api/v1')
 export class CompaniesController {
@@ -24,7 +26,8 @@ export class CompaniesController {
   }
 
   @Get('companies')
-  @ResponseMessage('Lấy danh sách company thành công')
+  @ResponseMessage('Get all companies success')
+  @Roles(RolesUser.Admin)
   findAll(
     @Query('page') currentPage: string,
     @Query('limit') limit: string,

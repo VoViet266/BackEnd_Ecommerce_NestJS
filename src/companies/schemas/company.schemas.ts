@@ -14,6 +14,8 @@ export class Company {
   @Prop()
   description: string;
 
+  @Prop()
+  createdAt: Date;
   @Prop({
     type: Object,
   })
