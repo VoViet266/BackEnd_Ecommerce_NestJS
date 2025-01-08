@@ -3,10 +3,8 @@ import { CreateUserDto, RegisterUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { User as userModel, UserDocument } from './schemas/user.schemas';
-
 import { genSaltSync, hashSync, compareSync } from 'bcryptjs';
 import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
-import { User } from 'src/decorator/customize';
 import { IUser } from './interface/user.interface';
 
 @Injectable()

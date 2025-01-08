@@ -9,10 +9,10 @@ import { softDeletePlugin } from 'soft-delete-plugin-mongoose';
 import { CompaniesModule } from './companies/companies.module';
 import { PermissionsModule } from './permissions/permissions.module';
 import { RolesModule } from './roles/roles.module';
+import { ProductModule } from './product/product.module';
 
 @Module({
   imports: [
-    UsersModule,
     MongooseModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({
@@ -27,10 +27,12 @@ import { RolesModule } from './roles/roles.module';
     ConfigModule.forRoot({
       isGlobal: true,
     }),
+    UsersModule,
     AuthModule,
     CompaniesModule,
     PermissionsModule,
     RolesModule,
+    ProductModule,
   ],
   controllers: [AppController],
   providers: [AppService],
