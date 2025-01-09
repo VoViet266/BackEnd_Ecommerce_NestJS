@@ -15,6 +15,7 @@ import { BrandModule } from './brand/brand.module';
 import { OrderModule } from './order/order.module';
 import { CartModule } from './cart/cart.module';
 import { mongodbConfig } from './config/mongodb.config';
+import { FileModule } from './file/file.module';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { mongodbConfig } from './config/mongodb.config';
     BrandModule,
     OrderModule,
     CartModule,
+    FileModule,
   ],
   controllers: [AppController],
   providers: [AppService],

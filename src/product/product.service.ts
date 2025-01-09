@@ -18,10 +18,10 @@ export class ProductService {
   create(createProductDto: CreateProductDto, user: IUser) {
     return this.productModel.create({
       ...createProductDto,
-      createdBy: {
-        id: user._id,
-        email: user.email,
-      },
+      // createdBy: {
+      //   id: user._id,
+      //   email: user.email,
+      // },
     });
   }
 

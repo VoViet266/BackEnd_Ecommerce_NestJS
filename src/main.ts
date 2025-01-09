@@ -8,6 +8,7 @@ import { JwtAuthGuard } from './common/guards/jwt.auth.guard';
 import { TransformInterceptor } from './common/interceptors/transform.interceptor';
 import { RolesGuard } from './common/guards/roles.guard';
 import cookieParser = require('cookie-parser');
+import * as express from 'express';
 // require('dotenv').config();
 
 declare const module: any;
@@ -15,6 +16,13 @@ async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
   app.useStaticAssets(join(__dirname, '..', 'public'));
   app.setBaseViewsDir(join(__dirname, '..', 'views'));
+  app.enableCors({
+    origin: '*',
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    preflightContinue: false,
+    optionsSuccessStatus: 204,
+    credentials: true,
+  });
 
   app.use(cookieParser());
   // Cần phải xác thực token mới cho phép truy cập vào các api khác
@@ -23,8 +31,10 @@ async function bootstrap() {
   // jwtAuthGuard sẽ xác thực token
   // RolesGuard sẽ xác thực role của user
   //
-  app.useGlobalGuards(new JwtAuthGuard(reflector), new RolesGuard(reflector));
-
+  // app.useGlobalGuards(new JwtAuthGuard(reflector), new RolesGuard(reflector));
+  // app.setViewEngine('ejs');
+  app.use(express.json()); // Giải mã JSON
+  app.use(express.urlencoded({ extended: true })); // Giải mã x-www-form-urlencoded
   app.useGlobalPipes(new ValidationPipe());
 
   app.useGlobalInterceptors(new TransformInterceptor(reflector));
