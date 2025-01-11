@@ -10,8 +10,8 @@ export class Category {
   @Prop()
   description: string;
 
-  @Prop({ type: [mongoose.Schema.Types.ObjectId], ref: Category.name })
-  parentCategoryId: mongoose.Types.ObjectId[];
+  // @Prop({ type: [mongoose.Schema.Types.ObjectId], ref: Category.name })
+  // parentCategoryId: mongoose.Types.ObjectId[];
 
   @Prop()
   createdAt: Date;

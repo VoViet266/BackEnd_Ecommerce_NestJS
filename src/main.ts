@@ -3,21 +3,24 @@ import { AppModule } from './app.module';
 import { join } from 'path';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { ConfigService } from '@nestjs/config';
-import { ValidationPipe } from '@nestjs/common';
+
 import { JwtAuthGuard } from './common/guards/jwt.auth.guard';
 import { TransformInterceptor } from './common/interceptors/transform.interceptor';
 import { RolesGuard } from './common/guards/roles.guard';
 import cookieParser = require('cookie-parser');
 import * as express from 'express';
-// require('dotenv').config();
+import { CACHE_MANAGER, CacheInterceptor } from '@nestjs/cache-manager';
+import { ValidationPipe } from '@nestjs/common';
+
 
 declare const module: any;
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
+
   app.useStaticAssets(join(__dirname, '..', 'public'));
   app.setBaseViewsDir(join(__dirname, '..', 'views'));
   app.enableCors({
-    origin: '*',
+    origin: 'http://localhost:3000',
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     preflightContinue: false,
     optionsSuccessStatus: 204,
@@ -26,6 +29,7 @@ async function bootstrap() {
 
   app.use(cookieParser());
   // Cần phải xác thực token mới cho phép truy cập vào các api khác
+  const cacheManager = app.get(CACHE_MANAGER);
   const reflector = app.get(Reflector);
   //jwtAuthGuard và RolesGuard sẽ được sử dụng cho tất cả các route
   // jwtAuthGuard sẽ xác thực token

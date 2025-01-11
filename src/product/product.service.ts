@@ -1,18 +1,20 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
 import { Product, ProductDocument } from './schemas/product.schemas';
-import { User } from 'src/decorator/customize';
 import { IUser } from 'src/user/interface/user.interface';
 import { InjectModel } from '@nestjs/mongoose';
 import aqp from 'api-query-params';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Cache } from 'cache-manager';
 
 @Injectable()
 export class ProductService {
   constructor(
     @InjectModel(Product.name)
     private readonly productModel: SoftDeleteModel<ProductDocument>,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
 
   create(createProductDto: CreateProductDto, user: IUser) {
@@ -55,16 +57,25 @@ export class ProductService {
   }
 
   async findOne(id: string) {
-    const existingProduct = await this.productModel.findById(id).exec();
+    // Kiểm tra cache
+    const cached = await this.cacheManager.get(`product-${id}`);
+    if (cached) {
+      return cached; // Trả về từ cache
+    }
+    // Nếu không có trong cache thì lấy từ database
+
+    const existingProduct = await this.productModel
+      .findById(id)
+      .populate(['categoryId', 'brandId'])
+      .exec();
     if (!existingProduct) {
       throw new NotFoundException(
         'Product with ID ${id} not found in the database',
       );
     }
-    return this.productModel
-      .findById(id)
-      .populate(['categoryId', 'brandId'])
-      .exec();
+    // Lưu vào cache
+    await this.cacheManager.set(`product-${id}`, existingProduct);
+    return existingProduct;
   }
 
   async update(id: string, updateProductDto: UpdateProductDto, user: IUser) {

@@ -23,9 +23,10 @@ export class AuthController {
   @Public()
   @ResponseMessage('Đăng nhập thành công')
   @Post('/login')
-  handleLogin(@Request() req, @Res({ passthrough: true }) res: Response) {
+  handleLogin(@Request() req: any, @Res({ passthrough: true }) res: Response) {
     return this.authService.login(req.user, res);
   }
+
   @Public()
   @Post('/register')
   @ResponseMessage('Đăng ký thành công')

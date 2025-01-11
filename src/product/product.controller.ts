@@ -7,13 +7,16 @@ import {
   Param,
   Delete,
   Query,
+  UseInterceptors,
 } from '@nestjs/common';
 import { ProductService } from './product.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
-import { ResponseMessage, User } from 'src/decorator/customize';
+import { Public, ResponseMessage, User } from 'src/decorator/customize';
 import { IUser } from 'src/user/interface/user.interface';
+import { CacheInterceptor } from '@nestjs/cache-manager';
 
+@UseInterceptors(CacheInterceptor)
 @Controller('api/v1/product')
 export class ProductController {
   constructor(private readonly productService: ProductService) {}
@@ -23,6 +26,8 @@ export class ProductController {
   create(@Body() createProductDto: CreateProductDto, @User() user: IUser) {
     return this.productService.create(createProductDto, user);
   }
+
+  @Public()
   @Get()
   @ResponseMessage('Get all products success')
   findAll(
@@ -34,8 +39,9 @@ export class ProductController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.productService.findOne(id);
+  @ResponseMessage('Get product by id success')
+  async findOne(@Param('id') id: string) {
+    return await this.productService.findOne(id);
   }
 
   @Patch(':id')

@@ -7,16 +7,21 @@ import {
   Param,
   Delete,
   Query,
+  UseInterceptors,
 } from '@nestjs/common';
 import { BrandService } from './brand.service';
 import { CreateBrandDto } from './dto/create-brand.dto';
 import { UpdateBrandDto } from './dto/update-brand.dto';
 import { ResponseMessage, User } from 'src/decorator/customize';
 import { IUser } from 'src/user/interface/user.interface';
+import { BrandCacheService } from './brand.cache.service';
 
 @Controller('/api/v1/brand')
 export class BrandController {
-  constructor(private readonly brandService: BrandService) {}
+  constructor(
+    private readonly brandService: BrandService,
+    private readonly brandCacheService: BrandCacheService,
+  ) {}
 
   @Post()
   @ResponseMessage('Brand created successfully')
@@ -33,10 +38,17 @@ export class BrandController {
     return this.brandService.findAll(+currentPage, +limit, qs);
   }
 
-  // @Get(':id')
-  // findOne(@Param('id') id: string) {
-  //   return this.brandService.findOne(id);
-  // }
+  @Get(':id')
+  @ResponseMessage('Get Brand by id success')
+  async findOne(@Param('id') id: string) {
+    const brandCache = await this.brandCacheService.getBrandFromCache(id);
+    if (brandCache) {
+      return brandCache;
+    }
+    const brand = await this.brandService.findOne(id);
+    await this.brandCacheService.setBrandToCache(id, brand);
+    return brand;
+  }
 
   @Patch(':id')
   @ResponseMessage('Brand updated successfully')

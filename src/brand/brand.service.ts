@@ -52,9 +52,9 @@ export class BrandService {
     };
   }
 
-  // findOne(id: string) {
-  //   return this.brandModel.findById(id).populate('categoryId').exec();
-  // }
+  findOne(id: string) {
+    return this.brandModel.findById(id).exec();
+  }
 
   update(id: string, updateBrandDto: UpdateBrandDto, user: IUser) {
     const existingBrand = this.brandModel.findById(id).exec();
