@@ -1,27 +1,47 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
 import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
 import { Order, OrderDocument } from './schemas/order.schema';
 import { InjectModel } from '@nestjs/mongoose';
-import { User } from 'src/decorator/customize';
 import { IUser } from 'src/user/interface/user.interface';
-import path from 'path';
+import { Product, ProductDocument } from 'src/product/schemas/product.schemas';
 
 @Injectable()
 export class OrderService {
   constructor(
     @InjectModel(Order.name)
     private readonly OrderModel: SoftDeleteModel<OrderDocument>,
+    @InjectModel(Product.name)
+    private readonly ProductModel: SoftDeleteModel<ProductDocument>,
   ) {}
-  create(createOrderDto: CreateOrderDto, user: IUser) {
-    return this.OrderModel.create({
+
+  async create(createOrderDto: CreateOrderDto, user: IUser) {
+    // Tạo đơn hàng
+    const newOrder = await this.OrderModel.create({
       ...createOrderDto,
       createdBy: {
         id: user._id,
         email: user.email,
       },
     });
+    // Dùng for...of để chờ từng sản phẩm được xử lý
+    for (const product of createOrderDto.products) {
+      const productDoc = await this.ProductModel.findById(product.productId);
+      if (!productDoc) {
+        return `Không tìm thấy sản phẩm với id ${product.productId}`;
+      }
+      if (productDoc.stock < product.quantity) {
+        return `Sản phẩm ${productDoc.name} không đủ số lượng`;
+      }
+
+      // Cập nhật số lượng kho sau khi đơn hàng được tạo
+      await this.ProductModel.findByIdAndUpdate(product.productId, {
+        stock: productDoc.stock - product.quantity,
+      });
+    }
+
+    return newOrder;
   }
 
   findAll() {

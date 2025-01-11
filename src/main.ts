@@ -31,7 +31,7 @@ async function bootstrap() {
   // jwtAuthGuard sẽ xác thực token
   // RolesGuard sẽ xác thực role của user
   //
-  // app.useGlobalGuards(new JwtAuthGuard(reflector), new RolesGuard(reflector));
+  app.useGlobalGuards(new JwtAuthGuard(reflector), new RolesGuard(reflector));
   // app.setViewEngine('ejs');
   app.use(express.json()); // Giải mã JSON
   app.use(express.urlencoded({ extended: true })); // Giải mã x-www-form-urlencoded

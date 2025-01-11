@@ -29,10 +29,10 @@ export class Product {
   price: number;
 
   @Prop()
-  stock: number;
+  stock: number; //số lượng tồn kho
 
   @Prop()
-  discount: number;
+  discount: number; //phần trăm giảm giá, nếu có
 
   @Prop({
     type: [mongoose.Schema.Types.ObjectId],
