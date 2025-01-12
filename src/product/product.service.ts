@@ -28,6 +28,13 @@ export class ProductService {
   }
 
   async findAll(currentPage: number, limit: number, qs: string) {
+    const cached = await this.cacheManager.get(
+      `products-${currentPage}-${limit}`,
+    );
+    if (cached) {
+      return cached; // Trả về từ cache
+    }
+
     const { filter, sort, population } = aqp(qs);
     delete filter.page;
     delete filter.limit;
@@ -45,7 +52,7 @@ export class ProductService {
       .populate(population)
       .exec();
 
-    return {
+    const response = {
       meta: {
         currentPage: +currentPage, // trang hiện tại
         pageSize: +limit, // số lượng item trên 1 trang
@@ -54,6 +61,9 @@ export class ProductService {
       },
       result: result,
     };
+
+    await this.cacheManager.set(`products-${currentPage}-${limit}`, response);
+    return response;
   }
 
   async findOne(id: string) {
