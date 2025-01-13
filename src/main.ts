@@ -11,7 +11,7 @@ import cookieParser = require('cookie-parser');
 import * as express from 'express';
 import { CACHE_MANAGER, CacheInterceptor } from '@nestjs/cache-manager';
 import { ValidationPipe } from '@nestjs/common';
-
+import { HttpExceptionFilter } from './common/filter/http-exception.filter';
 
 declare const module: any;
 async function bootstrap() {
@@ -40,6 +40,7 @@ async function bootstrap() {
   app.use(express.json()); // Giải mã JSON
   app.use(express.urlencoded({ extended: true })); // Giải mã x-www-form-urlencoded
   app.useGlobalPipes(new ValidationPipe());
+  app.useGlobalFilters(new HttpExceptionFilter());
 
   app.useGlobalInterceptors(new TransformInterceptor(reflector));
   const configService = app.get(ConfigService);

@@ -6,6 +6,7 @@ import {
   Patch,
   Param,
   Delete,
+  UseFilters,
 } from '@nestjs/common';
 import { OrderService } from './order.service';
 import { CreateOrderDto } from './dto/create-order.dto';
@@ -13,8 +14,10 @@ import { UpdateOrderDto } from './dto/update-order.dto';
 import { User } from 'src/decorator/customize';
 import { use } from 'passport';
 import { IUser } from 'src/user/interface/user.interface';
+import { HttpExceptionFilter } from 'src/common/filter/http-exception.filter';
 
 @Controller('/api/v1/order')
+@UseFilters(HttpExceptionFilter)
 export class OrderController {
   constructor(private readonly orderService: OrderService) {}
 

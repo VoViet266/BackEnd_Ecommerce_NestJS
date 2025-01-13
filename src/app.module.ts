@@ -31,7 +31,7 @@ import { redisStore } from 'cache-manager-redis-yet';
         },
         username: configService.get<string>('REDIS_USERNAME'),
         password: configService.get<string>('REDIS_PASSWORD'),
-        ttl: 30 * 1000, // Thời gian sống của cache (tính bằng giây)
+        ttl: 60 * 1000, // Thời gian sống của cache (tính bằng giây)
       }),
       inject: [ConfigService],
     }),

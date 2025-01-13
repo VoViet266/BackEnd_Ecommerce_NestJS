@@ -80,7 +80,7 @@ export class ProductService {
       .exec();
     if (!existingProduct) {
       throw new NotFoundException(
-        'Product with ID ${id} not found in the database',
+        `Sản phẩm với ID ${id} không tồn tại trong database`,
       );
     }
     // Lưu vào cache
@@ -94,7 +94,7 @@ export class ProductService {
     // Nếu không tồn tại, ném lỗi NotFoundException
     if (!existingProduct) {
       throw new NotFoundException(
-        `Product with ID ${id} not found in the database`,
+        `Sản phẩm với ID ${id} không tồn tại trong database`,
       );
     }
     return this.productModel.updateOne(
@@ -109,13 +109,14 @@ export class ProductService {
     );
   }
 
-  remove(id: string) {
+  async remove(id: string) {
     const existingProduct = this.productModel.findById(id).exec();
     if (!existingProduct) {
       throw new NotFoundException(
         `Product with ID ${id} not found in the database`,
       );
     }
+    await this.cacheManager.del(`product-${id}`);
     return this.productModel.deleteOne({ _id: id });
   }
 }

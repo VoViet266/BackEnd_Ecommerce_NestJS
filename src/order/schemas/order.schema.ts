@@ -16,7 +16,6 @@ export class Order {
       {
         productId: { type: Types.ObjectId, required: true, ref: Product.name },
         quantity: { type: Number, required: true },
-        price: { type: Number, required: true },
       },
     ],
     required: true,
@@ -68,26 +67,26 @@ export class Order {
 export const OrderSchema = SchemaFactory.createForClass(Order);
 
 // Tính tổng giá các sản phẩm trước khi lưu đơn hàng
-OrderSchema.pre('save', function (next) {
-  const order = this as Order;
+// OrderSchema.pre('save', function (next) {
+//   const order = this as Order;
 
-  // Tính tổng giá các sản phẩm
-  order.totalPrice = order.products.reduce((sum, product) => {
-    return sum + product.quantity * product.price;
-  }, 0);
+//   // Tính tổng giá các sản phẩm
+//   order.totalPrice = order.products.reduce((sum, product) => {
+//     return sum + product.quantity * product.price;
+//   }, 0);
 
-  next();
-});
-OrderSchema.pre(['updateOne', 'findOneAndUpdate'], function (next) {
-  const update = this.getUpdate();
-  if (update && (update as any).products) {
-    const totalPrice = (update as any).products.reduce(
-      (sum: number, product: { quantity: number; price: number }) => {
-        return sum + product.quantity * product.price;
-      },
-      0,
-    );
-    this.setUpdate({ ...update, totalPrice });
-  }
-  next();
-});
+//   next();
+// });
+// OrderSchema.pre(['updateOne', 'findOneAndUpdate'], function (next) {
+//   const update = this.getUpdate();
+//   if (update && (update as any).products) {
+//     const totalPrice = (update as any).products.reduce(
+//       (sum: number, product: { quantity: number; price: number }) => {
+//         return sum + product.quantity * product.price;
+//       },
+//       0,
+//     );
+//     this.setUpdate({ ...update, totalPrice });
+//   }
+//   next();
+// });
