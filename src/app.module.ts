@@ -10,14 +10,14 @@ import { CategoryModule } from './category/category.module';
 import { BrandModule } from './brand/brand.module';
 import { OrderModule } from './order/order.module';
 import { CartModule } from './cart/cart.module';
-import { mongodbConfig } from './config/mongodb.config';
+import { MongooseConfigService } from './config/mongodb.config';
 import { FileModule } from './file/file.module';
 import { CacheModule } from '@nestjs/cache-manager';
 import { redisStore } from 'cache-manager-redis-yet';
 
 @Module({
   imports: [
-    MongooseModule.forRootAsync(mongodbConfig),
+    MongooseModule.forRootAsync(MongooseConfigService),
     ConfigModule.forRoot({
       isGlobal: true,
     }),

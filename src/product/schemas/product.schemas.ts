@@ -4,7 +4,7 @@ import { ObjectId } from 'mongodb';
 import mongoose, { HydratedDocument } from 'mongoose';
 import { Brand } from 'src/brand/schemas/brand.schema';
 import { Category } from 'src/category/schemas/category.schemas';
-import { TypeImage } from 'src/Constant/typeImage.enum';
+import { TypeImage } from 'src/constant/typeImage.enum';
 
 export type ProductDocument = HydratedDocument<Product>;
 class Image {

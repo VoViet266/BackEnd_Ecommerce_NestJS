@@ -8,62 +8,134 @@ import { InjectModel } from '@nestjs/mongoose';
 import aqp from 'api-query-params';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
+import {
+  Category,
+  CategoryDocument,
+} from 'src/category/schemas/category.schemas';
+import { count } from 'console';
 
 @Injectable()
 export class ProductService {
   constructor(
     @InjectModel(Product.name)
     private readonly productModel: SoftDeleteModel<ProductDocument>,
+    @InjectModel(Category.name)
+    private readonly categoryModel: SoftDeleteModel<CategoryDocument>,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
 
   create(createProductDto: CreateProductDto, user: IUser) {
     return this.productModel.create({
       ...createProductDto,
-      // createdBy: {
-      //   id: user._id,
-      //   email: user.email,
-      // },
+      createdBy: {
+        id: user._id,
+        email: user.email,
+      },
     });
   }
 
   async findAll(currentPage: number, limit: number, qs: string) {
-    const cached = await this.cacheManager.get(
-      `products-${currentPage}-${limit}`,
-    );
-    if (cached) {
-      return cached; // Trả về từ cache
-    }
-
     const { filter, sort, population } = aqp(qs);
     delete filter.page;
     delete filter.limit;
 
     let offset = (+currentPage - 1) * +limit;
-    let defaultLimit = +limit ? +limit : 10; //nếu không có limit thì mặc định là 10 item
+    let defaultLimit = +limit ? +limit : 10; // Nếu không có limit, mặc định 10 item.
 
-    const totalItems = (await this.productModel.find(filter)).length; // tổng số phần tử
-    const totalPages = Math.ceil(totalItems / defaultLimit); // tổng số trang
-    const result = await this.productModel
-      .find(filter)
-      .skip(offset)
-      .limit(defaultLimit)
-      .sort(sort as any) // ép kiểu sort về any
-      .populate(population)
-      .exec();
+    let result: object[]; // Kết quả trả về.
+    let totalItems: number = 0;
 
-    const response = {
+    // Nếu filter có category hoặc brand, sử dụng aggregate để tìm kiếm theo tên.
+    if (filter.category || filter.brand) {
+      const matchConditions: any = {};
+
+      if (filter.category) {
+        matchConditions['category.name'] = {
+          $regex: filter.category,
+          $options: 'i',
+        };
+      }
+      if (filter.brand) {
+        matchConditions['brand.name'] = { $regex: filter.brand, $options: 'i' };
+      }
+
+      const aggregatePipeline = [
+        {
+          $lookup: {
+            from: 'categories', // Tên collection chứa thông tin category.
+            localField: 'categoryId', // Trường trong products (ObjectId).
+            foreignField: '_id', // Trường trong categories.
+            as: 'category', // Tên key mới chứa thông tin category.
+          },
+        },
+        {
+          $lookup: {
+            from: 'brands', // Tên collection chứa thông tin brand.
+            localField: 'brandId', // Trường trong products (ObjectId).
+            foreignField: '_id', // Trường trong brands.
+            as: 'brand', // Tên key mới chứa thông tin brand.
+          },
+        },
+        {
+          $match: matchConditions,// Điều kiện match. 
+        },
+        {
+          $project: {
+            name: 1,
+            description: 1,
+            price: 1,
+            stock: 1,
+            discount: 1,
+            images: 1,
+            category: {
+              _id: { $arrayElemAt: ['$category._id', 0] },
+              name: { $arrayElemAt: ['$category.name', 0] },
+            },
+            brand: {
+              _id: { $arrayElemAt: ['$brand._id', 0] },
+              name: { $arrayElemAt: ['$brand.name', 0] },
+              description: { $arrayElemAt: ['$brand.description', 0] },
+              logo: { $arrayElemAt: ['$brand.logo', 0] },
+            },
+          },
+        },
+        {
+          $facet: {
+            totalItems: [{ $count: 'count' }],
+            data: [{ $skip: offset }, { $limit: defaultLimit }],
+          },
+        },
+      ];
+
+      const aggregateResults = await this.productModel.aggregate(
+        aggregatePipeline,
+      );
+
+      result = aggregateResults[0].data;
+      totalItems = aggregateResults[0].totalItems[0]?.count || 0; // Tổng số sản phẩm lọc được.
+    } else {
+      totalItems = await this.productModel.countDocuments(filter);
+      result = await this.productModel
+        .find(filter)
+        .skip(offset)
+        .limit(defaultLimit)
+        .sort(sort as any) // Ép kiểu sort về any.
+        .populate(population)
+        .populate('categoryId', 'name') // Populate categoryId với name.
+        .populate('brandId', 'name description logo') // Populate brandId với các trường name, description, logo.
+        .exec();
+    }
+
+    const totalPages = Math.ceil(totalItems / defaultLimit); // Tổng số trang.
+    return {
       meta: {
-        currentPage: +currentPage, // trang hiện tại
-        pageSize: +limit, // số lượng item trên 1 trang
-        pages: totalPages, //  tổng số trang với điều kiện query
-        total: totalItems, //   tổng số phần tử
+        currentPage: +currentPage, // Trang hiện tại.
+        pageSize: defaultLimit, // Số item trên mỗi trang.
+        pages: totalPages, // Tổng số trang.
+        total: totalItems, // Tổng số sản phẩm.
       },
-      result: result,
+      result: result, // Kết quả sản phẩm.
     };
-
-    await this.cacheManager.set(`products-${currentPage}-${limit}`, response);
-    return response;
   }
 
   async findOne(id: string) {

@@ -14,14 +14,10 @@ import { CreateBrandDto } from './dto/create-brand.dto';
 import { UpdateBrandDto } from './dto/update-brand.dto';
 import { ResponseMessage, User } from 'src/decorator/customize';
 import { IUser } from 'src/user/interface/user.interface';
-import { BrandCacheService } from './brand.cache.service';
 
 @Controller('/api/v1/brand')
 export class BrandController {
-  constructor(
-    private readonly brandService: BrandService,
-    private readonly brandCacheService: BrandCacheService,
-  ) {}
+  constructor(private readonly brandService: BrandService) {}
 
   @Post()
   @ResponseMessage('Brand created successfully')
@@ -41,12 +37,7 @@ export class BrandController {
   @Get(':id')
   @ResponseMessage('Get Brand by id success')
   async findOne(@Param('id') id: string) {
-    const brandCache = await this.brandCacheService.getBrandFromCache(id);
-    if (brandCache) {
-      return brandCache;
-    }
     const brand = await this.brandService.findOne(id);
-    await this.brandCacheService.setBrandToCache(id, brand);
     return brand;
   }
 

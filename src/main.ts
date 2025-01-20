@@ -1,15 +1,13 @@
-import { NestApplication, NestFactory, Reflector } from '@nestjs/core';
+import { NestFactory, Reflector } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { join } from 'path';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { ConfigService } from '@nestjs/config';
-
 import { JwtAuthGuard } from './common/guards/jwt.auth.guard';
 import { TransformInterceptor } from './common/interceptors/transform.interceptor';
 import { RolesGuard } from './common/guards/roles.guard';
 import cookieParser = require('cookie-parser');
 import * as express from 'express';
-import { CACHE_MANAGER, CacheInterceptor } from '@nestjs/cache-manager';
 import { ValidationPipe } from '@nestjs/common';
 import { HttpExceptionFilter } from './common/filter/http-exception.filter';
 
@@ -29,7 +27,6 @@ async function bootstrap() {
 
   app.use(cookieParser());
   // Cần phải xác thực token mới cho phép truy cập vào các api khác
-  const cacheManager = app.get(CACHE_MANAGER);
   const reflector = app.get(Reflector);
   //jwtAuthGuard và RolesGuard sẽ được sử dụng cho tất cả các route
   // jwtAuthGuard sẽ xác thực token
@@ -41,8 +38,8 @@ async function bootstrap() {
   app.use(express.urlencoded({ extended: true })); // Giải mã x-www-form-urlencoded
   app.useGlobalPipes(new ValidationPipe());
   app.useGlobalFilters(new HttpExceptionFilter());
-
   app.useGlobalInterceptors(new TransformInterceptor(reflector));
+
   const configService = app.get(ConfigService);
 
   await app.listen(configService.get<string>('PORT'));

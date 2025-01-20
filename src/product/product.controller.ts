@@ -38,6 +38,16 @@ export class ProductController {
     return this.productService.findAll(+currentPage, +limit, qs);
   }
 
+  // @Public()
+  // @Get('search')
+  // @ResponseMessage('Search product success')
+  // getProductWithQuery( @Query('page') currentPage: string,
+  // @Query('limit') limit: string,
+  // @Query() qs: string,) {
+  //   return this.productService.findAllByCategory(+currentPage, +limit, qs);
+  // }
+
+  @Public()
   @Get(':id')
   @ResponseMessage('Get product by id success')
   async findOne(@Param('id') id: string) {

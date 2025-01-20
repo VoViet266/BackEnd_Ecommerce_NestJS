@@ -1,0 +1,13 @@
+version: '3.9'
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: nestjs-app
+    ports:
+      - '8080:8080'
+    environment:
+      MONGO_URI: mongodb+srv://VieDev:durNBv9YO1TvPvtJ@cluster0.h4trl.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0
+      REDIS_HOST: redis-17023.c295.ap-southeast-1-1.ec2.redns.redis-cloud.com
+      REDIS_PORT: 17023
