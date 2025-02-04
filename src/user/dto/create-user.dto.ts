@@ -1,4 +1,5 @@
-import { IsEmail, IsNotEmpty } from 'class-validator';
+import { IsEmail, IsEnum, IsNotEmpty } from 'class-validator';
+import { Gender } from 'src/constant/gender.enum';
 
 export class CreateUserDto {
   name: string;
@@ -41,6 +42,9 @@ export class RegisterUserDto {
   email: string;
   address: string;
   rolesID: string[];
+  @IsEnum(Gender, {
+    message: 'Giới tính không hợp lệ',
+  })
   gender: string;
   age: string;
 }

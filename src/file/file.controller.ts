@@ -43,10 +43,13 @@ export class FileController {
     @Req() request: Request,
   ) {
     const folderType = request.headers['folder_type'];
-    const filePath = `http://localhost:8080/images/${folderType}/${file.filename}`;
+
+    const filePath = folderType
+      ? `http://localhost:8080/images/${folderType}/${file.filename}`
+      : `http://localhost:8080/images/${file.filename}`;
     console.log(filePath);
     return {
-      filePath: filePath,
+      filePath: filePath, 
     };
   }
 

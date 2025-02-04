@@ -37,7 +37,8 @@ export class RoleService {
     });
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} role`;
+  remove(id: string) {
+    return this.roleModel.deleteOne({ _id: id
+    });
   }
 }

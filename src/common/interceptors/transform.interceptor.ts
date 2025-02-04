@@ -14,7 +14,6 @@ export interface Response<T> {
   message: string;
   data: any;
 }
-
 @Injectable()
 export class TransformInterceptor<T>
   implements NestInterceptor<T, Response<T>>

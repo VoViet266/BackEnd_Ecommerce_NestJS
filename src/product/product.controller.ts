@@ -16,7 +16,7 @@ import { Public, ResponseMessage, User } from 'src/decorator/customize';
 import { IUser } from 'src/user/interface/user.interface';
 import { CacheInterceptor } from '@nestjs/cache-manager';
 
-@UseInterceptors(CacheInterceptor)
+// @UseInterceptors(CacheInterceptor)
 @Controller('api/v1/product')
 export class ProductController {
   constructor(private readonly productService: ProductService) {}
@@ -68,5 +68,5 @@ export class ProductController {
   @ResponseMessage('Product deleted successfully')
   remove(@Param('id') id: string) {
     return this.productService.remove(id);
-  }
+  } 
 }

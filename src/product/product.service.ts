@@ -6,13 +6,12 @@ import { Product, ProductDocument } from './schemas/product.schemas';
 import { IUser } from 'src/user/interface/user.interface';
 import { InjectModel } from '@nestjs/mongoose';
 import aqp from 'api-query-params';
-import { CACHE_MANAGER } from '@nestjs/cache-manager';
-import { Cache } from 'cache-manager';
+// import { CACHE_MANAGER } from '@nestjs/cache-manager';
+// import { Cache } from 'cache-manager';
 import {
   Category,
   CategoryDocument,
 } from 'src/category/schemas/category.schemas';
-import { count } from 'console';
 
 @Injectable()
 export class ProductService {
@@ -20,11 +19,11 @@ export class ProductService {
     @InjectModel(Product.name)
     private readonly productModel: SoftDeleteModel<ProductDocument>,
     @InjectModel(Category.name)
-    private readonly categoryModel: SoftDeleteModel<CategoryDocument>,
-    @Inject(CACHE_MANAGER) private cacheManager: Cache,
+    private readonly categoryModel: SoftDeleteModel<CategoryDocument>, // @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
 
   create(createProductDto: CreateProductDto, user: IUser) {
+    const { categoryId, brandId } = createProductDto;
     return this.productModel.create({
       ...createProductDto,
       createdBy: {
@@ -40,7 +39,7 @@ export class ProductService {
     delete filter.limit;
 
     let offset = (+currentPage - 1) * +limit;
-    let defaultLimit = +limit ? +limit : 10; // Nếu không có limit, mặc định 10 item.
+    let defaultLimit = +limit ? +limit : 20; // Nếu không có limit, mặc định 10 item.
 
     let result: object[]; // Kết quả trả về.
     let totalItems: number = 0;
@@ -77,7 +76,7 @@ export class ProductService {
           },
         },
         {
-          $match: matchConditions,// Điều kiện match. 
+          $match: matchConditions, // Điều kiện match.
         },
         {
           $project: {
@@ -140,10 +139,10 @@ export class ProductService {
 
   async findOne(id: string) {
     // Kiểm tra cache
-    const cached = await this.cacheManager.get(`product-${id}`);
-    if (cached) {
-      return cached; // Trả về từ cache
-    }
+    // const cached = await this.cacheManager.get(`product-${id}`);
+    // if (cached) {
+    //   return cached; // Trả về từ cache
+    // }
     // Nếu không có trong cache thì lấy từ database
 
     const existingProduct = await this.productModel
@@ -156,7 +155,7 @@ export class ProductService {
       );
     }
     // Lưu vào cache
-    await this.cacheManager.set(`product-${id}`, existingProduct);
+    // await this.cacheManager.set(`product-${id}`, existingProduct);
     return existingProduct;
   }
 
@@ -188,7 +187,7 @@ export class ProductService {
         `Product with ID ${id} not found in the database`,
       );
     }
-    await this.cacheManager.del(`product-${id}`);
+    // await this.cacheManager.del(`product-${id}`);
     return this.productModel.deleteOne({ _id: id });
   }
 }

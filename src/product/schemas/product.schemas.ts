@@ -8,14 +8,12 @@ import { TypeImage } from 'src/constant/typeImage.enum';
 
 export type ProductDocument = HydratedDocument<Product>;
 class Image {
-  @Prop({ type: String, enum: TypeImage })
-  type: TypeImage;
-
   @Prop({ type: String, required: true })
-  url: string;
-
-  @Prop({ type: String })
-  alt: string;
+  main: string[];
+  @Prop({ type: String, required: true })
+  thumbnail: string[];
+  @Prop({ type: String }) 
+  gallery: string[];
 }
 @Schema({ timestamps: true })
 export class Product {

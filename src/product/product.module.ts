@@ -15,7 +15,6 @@ import { CategoryModule } from 'src/category/category.module';
       { name: Product.name, schema: ProductSchema },
       { name: Category.name, schema: CategorySchema },
     ]),
-    CategoryModule,
   ],
   controllers: [ProductController],
   providers: [ProductService],

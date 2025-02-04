@@ -41,6 +41,7 @@ export class UsersService {
       );
     }
     const hashedPassword = this.hashPassword(password);
+
     let newRegister = await this.userModel.create({
       name,
       email,
