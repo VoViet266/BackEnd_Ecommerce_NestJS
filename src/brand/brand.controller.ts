@@ -12,7 +12,7 @@ import {
 import { BrandService } from './brand.service';
 import { CreateBrandDto } from './dto/create-brand.dto';
 import { UpdateBrandDto } from './dto/update-brand.dto';
-import { ResponseMessage, User } from 'src/decorator/customize';
+import { Public, ResponseMessage, User } from 'src/decorator/customize';
 import { IUser } from 'src/user/interface/user.interface';
 
 @Controller('/api/v1/brand')
@@ -26,6 +26,7 @@ export class BrandController {
   }
   @Get()
   @ResponseMessage('Get all Brand success')
+  @Public()
   findAll(
     @Query('page') currentPage: string,
     @Query('limit') limit: string,

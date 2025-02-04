@@ -12,18 +12,18 @@ class Image {
   main: string[];
   @Prop({ type: String, required: true })
   thumbnail: string[];
-  @Prop({ type: String }) 
+  @Prop({ type: String })
   gallery: string[];
 }
 @Schema({ timestamps: true })
 export class Product {
-  @Prop({ required: true })
-  name: string;
+  @Prop({ type: String, required: true })
+  name: string; 
 
   @Prop()
   description: string;
 
-  @Prop({ required: true })
+  @Prop()
   price: number;
 
   @Prop()

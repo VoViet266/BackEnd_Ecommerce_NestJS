@@ -6,8 +6,8 @@ import { Product, ProductDocument } from './schemas/product.schemas';
 import { IUser } from 'src/user/interface/user.interface';
 import { InjectModel } from '@nestjs/mongoose';
 import aqp from 'api-query-params';
-// import { CACHE_MANAGER } from '@nestjs/cache-manager';
-// import { Cache } from 'cache-manager';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Cache } from 'cache-manager';
 import {
   Category,
   CategoryDocument,
@@ -19,11 +19,11 @@ export class ProductService {
     @InjectModel(Product.name)
     private readonly productModel: SoftDeleteModel<ProductDocument>,
     @InjectModel(Category.name)
-    private readonly categoryModel: SoftDeleteModel<CategoryDocument>, // @Inject(CACHE_MANAGER) private cacheManager: Cache,
+    private readonly categoryModel: SoftDeleteModel<CategoryDocument>,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
 
   create(createProductDto: CreateProductDto, user: IUser) {
-    const { categoryId, brandId } = createProductDto;
     return this.productModel.create({
       ...createProductDto,
       createdBy: {
@@ -38,13 +38,20 @@ export class ProductService {
     delete filter.page;
     delete filter.limit;
 
-    let offset = (+currentPage - 1) * +limit;
-    let defaultLimit = +limit ? +limit : 20; // Nếu không có limit, mặc định 10 item.
+    const offset = (currentPage - 1) * limit;
+    const defaultLimit = limit || 20;
 
-    let result: object[]; // Kết quả trả về.
-    let totalItems: number = 0;
+    const cacheKey = `product-${currentPage}-${limit}-${
+      filter.category || ''
+    }-${filter.brand || ''}`;
+    const cached = await this.cacheManager.get(cacheKey);
+    if (cached) {
+      return cached;
+    }
 
-    // Nếu filter có category hoặc brand, sử dụng aggregate để tìm kiếm theo tên.
+    let result: object[];
+    let totalItems: number;
+
     if (filter.category || filter.brand) {
       const matchConditions: any = {};
 
@@ -61,23 +68,21 @@ export class ProductService {
       const aggregatePipeline = [
         {
           $lookup: {
-            from: 'categories', // Tên collection chứa thông tin category.
-            localField: 'categoryId', // Trường trong products (ObjectId).
-            foreignField: '_id', // Trường trong categories.
-            as: 'category', // Tên key mới chứa thông tin category.
+            from: 'categories',
+            localField: 'categoryId',
+            foreignField: '_id',
+            as: 'category',
           },
         },
         {
           $lookup: {
-            from: 'brands', // Tên collection chứa thông tin brand.
-            localField: 'brandId', // Trường trong products (ObjectId).
-            foreignField: '_id', // Trường trong brands.
-            as: 'brand', // Tên key mới chứa thông tin brand.
+            from: 'brands',
+            localField: 'brandId',
+            foreignField: '_id',
+            as: 'brand',
           },
         },
-        {
-          $match: matchConditions, // Điều kiện match.
-        },
+        { $match: matchConditions },
         {
           $project: {
             name: 1,
@@ -109,40 +114,42 @@ export class ProductService {
       const aggregateResults = await this.productModel.aggregate(
         aggregatePipeline,
       );
-
       result = aggregateResults[0].data;
-      totalItems = aggregateResults[0].totalItems[0]?.count || 0; // Tổng số sản phẩm lọc được.
+      totalItems = aggregateResults[0].totalItems[0]?.count || 0;
     } else {
       totalItems = await this.productModel.countDocuments(filter);
       result = await this.productModel
         .find(filter)
         .skip(offset)
         .limit(defaultLimit)
-        .sort(sort as any) // Ép kiểu sort về any.
+        .sort(sort as any)
         .populate(population)
-        .populate('categoryId', 'name') // Populate categoryId với name.
-        .populate('brandId', 'name description logo') // Populate brandId với các trường name, description, logo.
+        .populate('categoryId', 'name')
+        .populate('brandId', 'name description logo')
         .exec();
     }
 
-    const totalPages = Math.ceil(totalItems / defaultLimit); // Tổng số trang.
-    return {
+    const totalPages = Math.ceil(totalItems / defaultLimit);
+    const response = {
       meta: {
-        currentPage: +currentPage, // Trang hiện tại.
-        pageSize: defaultLimit, // Số item trên mỗi trang.
-        pages: totalPages, // Tổng số trang.
-        total: totalItems, // Tổng số sản phẩm.
+        currentPage,
+        pageSize: defaultLimit,
+        pages: totalPages,
+        total: totalItems,
       },
-      result: result, // Kết quả sản phẩm.
+      result,
     };
+
+    await this.cacheManager.set(cacheKey, response);
+    return response;
   }
 
   async findOne(id: string) {
     // Kiểm tra cache
-    // const cached = await this.cacheManager.get(`product-${id}`);
-    // if (cached) {
-    //   return cached; // Trả về từ cache
-    // }
+    const cached = await this.cacheManager.get(`product-${id}`);
+    if (cached) {
+      return cached; // Trả về từ cache
+    }
     // Nếu không có trong cache thì lấy từ database
 
     const existingProduct = await this.productModel
@@ -155,13 +162,12 @@ export class ProductService {
       );
     }
     // Lưu vào cache
-    // await this.cacheManager.set(`product-${id}`, existingProduct);
+    await this.cacheManager.set(`product-${id}`, existingProduct);
     return existingProduct;
   }
 
   async update(id: string, updateProductDto: UpdateProductDto, user: IUser) {
     const existingProduct = await this.productModel.findById(id).exec();
-
     // Nếu không tồn tại, ném lỗi NotFoundException
     if (!existingProduct) {
       throw new NotFoundException(
@@ -187,7 +193,7 @@ export class ProductService {
         `Product with ID ${id} not found in the database`,
       );
     }
-    // await this.cacheManager.del(`product-${id}`);
+    await this.cacheManager.del(`product-${id}`);
     return this.productModel.deleteOne({ _id: id });
   }
 }

@@ -10,6 +10,6 @@ export class CreateProductDto {
   discount: number;
   stock: number;
   categoryId: string[];
-  brandId: string;
+  brandId: string[];
   images: string[];
 }

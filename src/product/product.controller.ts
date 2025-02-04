@@ -14,22 +14,20 @@ import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { Public, ResponseMessage, User } from 'src/decorator/customize';
 import { IUser } from 'src/user/interface/user.interface';
-import { CacheInterceptor } from '@nestjs/cache-manager';
 
-// @UseInterceptors(CacheInterceptor)
 @Controller('api/v1/product')
 export class ProductController {
   constructor(private readonly productService: ProductService) {}
 
   @Post()
-  @ResponseMessage('Product created successfully')
+  @ResponseMessage('Tạo sản phẩm thành công')
   create(@Body() createProductDto: CreateProductDto, @User() user: IUser) {
     return this.productService.create(createProductDto, user);
   }
 
   @Public()
   @Get()
-  @ResponseMessage('Get all products success')
+  @ResponseMessage('Lấy danh sách sản phẩm thành công')
   findAll(
     @Query('page') currentPage: string,
     @Query('limit') limit: string,
@@ -38,24 +36,15 @@ export class ProductController {
     return this.productService.findAll(+currentPage, +limit, qs);
   }
 
-  // @Public()
-  // @Get('search')
-  // @ResponseMessage('Search product success')
-  // getProductWithQuery( @Query('page') currentPage: string,
-  // @Query('limit') limit: string,
-  // @Query() qs: string,) {
-  //   return this.productService.findAllByCategory(+currentPage, +limit, qs);
-  // }
-
   @Public()
   @Get(':id')
-  @ResponseMessage('Get product by id success')
+  @ResponseMessage('lấy thông tin sản phẩm thông qua Id thành công')
   async findOne(@Param('id') id: string) {
     return await this.productService.findOne(id);
   }
 
   @Patch(':id')
-  @ResponseMessage('Product updated successfully')
+  @ResponseMessage('Câp nhật sản phẩm thành công')
   update(
     @Param('id') id: string,
     @Body() updateProductDto: UpdateProductDto,
@@ -65,8 +54,8 @@ export class ProductController {
   }
 
   @Delete(':id')
-  @ResponseMessage('Product deleted successfully')
+  @ResponseMessage('Đã xóa sản phẩm thành công')
   remove(@Param('id') id: string) {
     return this.productService.remove(id);
-  } 
+  }
 }

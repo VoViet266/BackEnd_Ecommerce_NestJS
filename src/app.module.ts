@@ -20,20 +20,20 @@ import { redisStore } from 'cache-manager-redis-yet';
     ConfigModule.forRoot({
       isGlobal: true,
     }),
-    // CacheModule.registerAsync({
-    //   isGlobal: true,
-    //   useFactory: async (configService: ConfigService) => ({
-    //     store: redisStore,
-    //     socket: {
-    //       host: configService.get<string>('REDIS_HOST'),
-    //       port: configService.get<number>('REDIS_PORT'),
-    //     },
-    //     username: configService.get<string>('REDIS_USERNAME'),
-    //     password: configService.get<string>('REDIS_PASSWORD'),
-    //     ttl: 60 * 1000, // Thời gian sống của cache (tính bằng giây)
-    //   }),
-    //   inject: [ConfigService],
-    // }),
+    CacheModule.registerAsync({
+      isGlobal: true,
+      useFactory: async (configService: ConfigService) => ({
+        store: redisStore,
+        socket: {
+          host: configService.get<string>('REDIS_HOST'),
+          port: configService.get<number>('REDIS_PORT'),
+        },
+        username: configService.get<string>('REDIS_USERNAME'),
+        password: configService.get<string>('REDIS_PASSWORD'),
+        ttl: 60 * 1000, // Thời gian sống của cache (tính bằng giây)
+      }),
+      inject: [ConfigService],
+    }),
     UsersModule,
     AuthModule,
     PermissionsModule,

@@ -24,7 +24,7 @@ export class FileController {
   constructor(private readonly fileService: FileService) {}
 
   @Post('upload')
-  @ResponseMessage('File uploaded successfully')
+  @ResponseMessage('Upload file thành công')
   @UseInterceptors(FileInterceptor('file'))
   uploadFile(
     @UploadedFile(
@@ -49,7 +49,7 @@ export class FileController {
       : `http://localhost:8080/images/${file.filename}`;
     console.log(filePath);
     return {
-      filePath: filePath, 
+      filePath: filePath,
     };
   }
 
