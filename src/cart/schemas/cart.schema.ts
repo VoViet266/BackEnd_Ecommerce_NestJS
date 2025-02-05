@@ -17,10 +17,17 @@ export class Cart extends Document {
         required: true,
         ref: Product.name,
       },
-      quantity: { type: Number, required: true },
+      quantity: { type: Number, required: true }, // Số lượng sản phẩm
+      price: { type: Number, required: true }, // Giá lúc thêm vào giỏ hàng
+      total: { type: Number, required: true }, // Tổng giá trị của sản phẩm trong giỏ hàng
     },
   ])
-  products: { productId: Types.ObjectId; quantity: number }[];
+  products: {
+    productId: Types.ObjectId;
+    quantity: number;
+    price: number;
+    total: number;
+  }[];
 
   @Prop()
   createdAt: Date;

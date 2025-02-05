@@ -11,10 +11,11 @@ import {
 import { OrderService } from './order.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
-import { ResponseMessage, User } from 'src/decorator/customize';
+import { ResponseMessage, Roles, User } from 'src/decorator/customize';
 import { use } from 'passport';
 import { IUser } from 'src/user/interface/user.interface';
 import { HttpExceptionFilter } from 'src/common/filter/http-exception.filter';
+import { RolesUser } from 'src/constant/roles.enum';
 
 @Controller('/api/v1/order')
 @UseFilters(HttpExceptionFilter)

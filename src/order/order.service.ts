@@ -6,6 +6,7 @@ import { Order, OrderDocument } from './schemas/order.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { IUser } from 'src/user/interface/user.interface';
 import { Product, ProductDocument } from 'src/product/schemas/product.schemas';
+import { Cart, CartDocument } from 'src/cart/schemas/cart.schema';
 
 @Injectable()
 export class OrderService {
@@ -14,22 +15,54 @@ export class OrderService {
     private readonly OrderModel: SoftDeleteModel<OrderDocument>,
     @InjectModel(Product.name)
     private readonly ProductModel: SoftDeleteModel<ProductDocument>,
+    @InjectModel(Cart.name)
+    private readonly CartModel: SoftDeleteModel<CartDocument>,
   ) {}
 
   async create(createOrderDto: CreateOrderDto, user: IUser) {
-    let totalPrice = 0;
+    const userCart = await this.CartModel.findOne({ userId: user._id });
+    if (!userCart || userCart.products.length === 0) {
+      throw new HttpException(
+        {
+          statusCode: HttpStatus.BAD_REQUEST,
+          message: 'Giỏ hàng của bạn đang trống!',
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
 
+    const cartProductIds = userCart.products.map((product) =>
+      product.productId.toString(),
+    );
+    createOrderDto.products = userCart.products.map((product) => ({
+      productId: product.productId.toString(),
+      quantity: product.quantity,
+      price: product.price,
+    }));
+
+    let totalPrice = 0;
     for (const product of createOrderDto.products) {
+      if (!cartProductIds.includes(product.productId)) {
+        throw new HttpException(
+          {
+            statusCode: HttpStatus.BAD_REQUEST,
+            message: `Sản phẩm ${product.productId} không có trong giỏ hàng!`,
+          },
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+
       const productDoc = await this.ProductModel.findById(product.productId);
       if (!productDoc) {
         throw new HttpException(
           {
             statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
-            message: `Không tìm thấy sản phẩm ${product.productId}`,
+            message: `Không tìm thấy sản phẩm ${productDoc.name}`,
           },
           HttpStatus.INTERNAL_SERVER_ERROR,
         );
       }
+
       if (productDoc.stock < product.quantity) {
         throw new HttpException(
           {
@@ -48,20 +81,22 @@ export class OrderService {
     }
 
     createOrderDto.totalPrice = totalPrice;
-
     const newOrder = await this.OrderModel.create({
       ...createOrderDto,
+      userId: user._id,
+      status: 'Pending',
       createdBy: {
         id: user._id,
         email: user.email,
       },
     });
-
+    //Xóa giỏ hàng sau khi tạo đơn hàng
+    await this.CartModel.findOneAndDelete({ userId: user._id });
     return newOrder;
   }
 
   findAll() {
-    return `This action returns all order`;
+    return this.OrderModel.find()
   }
 
   findOne(id: string) {

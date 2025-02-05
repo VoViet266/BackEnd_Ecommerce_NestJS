@@ -3,6 +3,7 @@ import { CartService } from './cart.service';
 import { CartController } from './cart.controller';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Cart, CartSchema } from './schemas/cart.schema';
+import { ProductModule } from 'src/product/product.module';
 
 @Module({
   imports: [
@@ -12,9 +13,10 @@ import { Cart, CartSchema } from './schemas/cart.schema';
         schema: CartSchema,
       },
     ]),
+    ProductModule,
   ],
   controllers: [CartController],
   providers: [CartService],
-  exports: [CartService],
+  exports: [CartService, MongooseModule],
 })
 export class CartModule {}
