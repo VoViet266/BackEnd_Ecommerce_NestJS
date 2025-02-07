@@ -19,6 +19,7 @@ import { redisStore } from 'cache-manager-redis-yet';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
+      envFilePath: ['.env', '.env.development', '.env.production'],
     }),
     CacheModule.registerAsync({
       isGlobal: true,

@@ -18,11 +18,19 @@ import { UpdateFileDto } from './dto/update-file.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ResponseMessage } from 'src/decorator/customize';
 import { Request } from 'express';
+import { ConfigService } from '@nestjs/config';
 
 @Controller('api/v1')
 export class FileController {
-  constructor(private readonly fileService: FileService) {}
-
+  private readonly Base_URL: string;
+  private readonly PORT: string;
+  constructor(
+    private readonly fileService: FileService,
+    private readonly configService: ConfigService,
+  ) {
+    this.Base_URL = this.configService.get<string>('BASE_URL');
+    this.PORT = this.configService.get<string>('PORT');
+  }
   @Post('upload')
   @ResponseMessage('Upload file thành công')
   @UseInterceptors(FileInterceptor('file'))
@@ -45,8 +53,8 @@ export class FileController {
     const folderType = request.headers['folder_type'];
 
     const filePath = folderType
-      ? `http://localhost:8080/images/${folderType}/${file.filename}`
-      : `http://localhost:8080/images/${file.filename}`;
+      ? `${this.Base_URL}${this.PORT}/images/${folderType}/${file.filename}`
+      : `${this.Base_URL}${this.PORT}/images/${file.filename}`;
     console.log(filePath);
     return {
       filePath: filePath,

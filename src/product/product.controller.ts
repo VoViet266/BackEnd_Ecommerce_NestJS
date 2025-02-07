@@ -23,7 +23,7 @@ export class ProductController {
 
   @Post()
   @ResponseMessage('Tạo sản phẩm thành công')
-  @Roles(RolesUser.Admin)
+  // @Roles(RolesUser.Admin)
   create(@Body() createProductDto: CreateProductDto, @User() user: IUser) {
     return this.productService.create(createProductDto, user);
   }
